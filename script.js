@@ -283,7 +283,111 @@ function updateMethodDescription() {
 
 // ==================== EVENT LISTENERS ====================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener// ==================== FUNCIONALIDAD MOBILE ====================
+
+// Toggle sidebar en mobile
+const sidebarToggle = document.getElementById('sidebarToggle');
+const sidebar = document.querySelector('.sidebar');
+const mobilePreviewToggle = document.getElementById('mobilePreviewToggle');
+const previewContainer = document.querySelector('.preview-container');
+
+if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+    });
+    
+    // Cerrar sidebar al hacer clic fuera (solo mobile)
+    if (window.innerWidth < 768) {
+        document.addEventListener('click', function(event) {
+            if (sidebar.classList.contains('active') && 
+                !sidebar.contains(event.target) && 
+                !sidebarToggle.contains(event.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+    }
+}
+
+// Toggle vista previa en mobile
+if (mobilePreviewToggle && previewContainer) {
+    mobilePreviewToggle.addEventListener('click', function() {
+        previewContainer.classList.toggle('show');
+        const icon = this.querySelector('i');
+        if (previewContainer.classList.contains('show')) {
+            icon.className = 'fas fa-eye-slash';
+            this.title = 'Ocultar vista previa';
+        } else {
+            icon.className = 'fas fa-eye';
+            this.title = 'Mostrar vista previa';
+        }
+    });
+}
+
+// Ajustar altura del textarea automáticamente
+const messageInput = document.getElementById('messageInput');
+if (messageInput) {
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+}
+
+// Cerrar teclado virtual al enviar en iOS/Android
+function dismissKeyboard() {
+    if (messageInput) {
+        messageInput.blur();
+    }
+}
+
+// Modificar función sendMessage para mobile
+const originalSendMessage = window.sendMessage;
+window.sendMessage = function() {
+    if (originalSendMessage) {
+        originalSendMessage();
+    }
+    dismissKeyboard();
+    
+    // Cerrar sidebar en mobile después de enviar
+    if (window.innerWidth < 768 && sidebar) {
+        sidebar.classList.remove('active');
+    }
+};
+
+// Detectar si es móvil y ajustar
+function detectMobile() {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        // Ajustes específicos para móvil
+        document.body.classList.add('mobile-device');
+        
+        // Ocultar sidebar por defecto en mobile
+        if (sidebar && window.innerWidth < 768) {
+            sidebar.classList.remove('active');
+        }
+        
+        // Mejorar experiencia táctil
+        document.querySelectorAll('.message-content').forEach(msg => {
+            msg.style.cursor = 'pointer';
+        });
+    }
+}
+
+// Ejecutar detección
+setTimeout(detectMobile, 100);
+
+// Prevenir zoom en input en iOS
+if (messageInput) {
+    messageInput.addEventListener('focus', function() {
+        setTimeout(() => {
+            this.style.fontSize = '16px';
+        }, 100);
+    });
+    
+    messageInput.addEventListener('blur', function() {
+        this.style.fontSize = '';
+    });
+}('DOMContentLoaded', function() {
     // Inicializar
     updateMethodDescription();
     
@@ -433,4 +537,5 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         document.body.style.opacity = '1';
     }, 100);
+
 });
