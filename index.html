@@ -12,19 +12,25 @@
     <div class="app-container">
         <!-- Encabezado -->
         <header class="app-header">
-            <div class="header-left">
-                <i class="fas fa-user-secret logo-icon"></i>
-                <h1>SecretChat</h1>
-            </div>
-            <div class="header-right">
-                <button id="themeToggle" class="icon-btn" title="Cambiar tema">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <button id="helpBtn" class="icon-btn" title="Ayuda">
-                    <i class="fas fa-question-circle"></i>
-                </button>
-            </div>
-        </header>
+    <div class="header-left">
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <i class="fas fa-user-secret logo-icon"></i>
+        <h1>SecretChat</h1>
+    </div>
+    <div class="header-right">
+        <div class="user-info" id="userInfo" style="display: none;">
+            <!-- Info de usuario se insertará aquí -->
+        </div>
+        <button id="themeToggle" class="icon-btn" title="Cambiar tema">
+            <i class="fas fa-moon"></i>
+        </button>
+        <button id="helpBtn" class="icon-btn" title="Ayuda">
+            <i class="fas fa-question-circle"></i>
+        </button>
+    </div>
+</header> 
 
         <div class="main-content">
             <!-- Panel izquierdo: Contactos/Métodos -->
@@ -203,4 +209,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
