@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>SecretChat Mobile - Mensajes Codificados</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <style>
+        /* ========== ESTILOS RESPONSIVE TODO EN UNO ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --bg: #ffffff;
+            --surface: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        body.dark-mode {
+            --primary: #a78bfa;
+            --primary-dark: #8b5cf6;
+            --bg: #1e1e2e;
+            --surface: #2d3748;
+            --text: #e2e8f0;
+            --text-light: #a0aec0;
+            --border: #4a5568;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            color: var(--text);
+            transition: background 0.3s;
+        }
+        
+        .app-container {
+            width: 100%;
+            height: 100vh;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* ========== HEADER MOBILE ========== */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            height: 60px;
+            flex-shrink: 0;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        
+        .menu-toggle:active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .logo-icon {
+            font-size: 1.5rem;
+        }
+        
+        .app-header h1 {
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        
+        /* ========== SIDEBAR MOBILE ========== */
+        .sidebar {
+            position: fixed;
+            top: 60px;
+            left: -100%;
+            width: 100%;
+            height: calc(100vh - 60px);
+            background: var(--surface);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            padding: 20px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .sidebar.active {
+            left: 0;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+        
+        .sidebar-section h3 {
+            color: var(--primary);
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .method-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+        
+        /* ========== CHAT AREA ========== */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .contact-info h2 {
+            font-size: 1rem;
+        }
+        
+        .contact-info p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        
+        .messages-container {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: var(--surface);
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .message {
+            max-width: 90%;
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.sent {
+            margin-left: auto;
+        }
+        
+        .message-content {
+            background: var(--bg);
+            padding: 12px;
+            border-radius: 15px;
+            border-top-left-radius: 0;
+            box-shadow: var(--shadow);
+            word-break: break-word;
+        }
+        
+        .message.sent .message-content {
+            background: var(--primary);
+            color: white;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 0;
+        }
+        
+        .encoded-text {
+            font-family: 'Source Code Pro', monospace;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            word-break: break-all;
+        }
+        
+        .decoded-text {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border);
+        }
+        
+        .message.show-decoded .decoded-text {
+            display: block;
+        }
+        
+        .message.show-decoded .encoded-text {
+            display: none;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        /* ========== INPUT AREA ========== */
+        .input-area {
+            padding: 15px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+            flex-shrink: 0;
+        }
+        
+        .input-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            color: var(--text);
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px; /* Evita zoom en iOS */
+            resize: none;
+            min-height: 80px;
+            max-height: 150px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .send-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            gap: 10px;
+        }
+        
+        .char-count {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        
+        .send-btn {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+        
+        /* ========== BOTÓN FLOTANTE ========== */
+        .float-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        /* ========== MEDIA QUERIES ========== */
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 1200px;
+                margin: 20px auto;
+                height: 90vh;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            }
+            
+            .main-content {
+                display: flex;
+                flex-direction: row;
+            }
+            
+            .sidebar {
+                position: relative;
+                top: 0;
+                left: 0;
+                width: 300px;
+                height: auto;
+                border-right: 1px solid var(--border);
+                border-top: none;
+            }
+            
+            .menu-toggle {
+                display: none;
+            }
+            
+            .float-btn {
+                display: none;
+            }
+        }
+        
+        /* ========== UTILITIES ========== */
+        .hidden {
+            display: none !important;
+        }
+        
+        .active {
+            background: var(--primary) !important;
+            color: white !important;
+        }
+        
+        /* Mejoras para iOS */
+        @supports (-webkit-touch-callout: none) {
+            textarea, input {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header Mobile -->
+        <header class="app-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <i class="fas fa-user-secret logo-icon"></i>
+                <h1>SecretChat Mobile</h1>
+            </div>
+            <div class="header-right">
+                <button id="themeToggle" class="icon-btn" title="Tema">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="helpBtn" class="icon-btn" title="Ayuda">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Sidebar Mobile -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <h3><i class="fas fa-users"></i> Contactos</h3>
+                <div class="contacts-list">
+                    <div class="contact active">
+                        <div class="contact-avatar">ES</div>
+                        <div class="contact-info">
+                            <div class="contact-name">Esposa</div>
+                            <div class="contact-status">En línea</div>
+                        </div>
+                    </div>
+                    <div class="contact">
+                        <div class="contact-avatar">YO</div>
+                        <div class="contact-info">
+                            <div class="contact-name">Yo</div>
+                            <div class="contact-status">Codificando...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3><i class="fas fa-lock"></i> Codificación</h3>
+                <select id="encodingMethod" class="method-select">
+                    <option value="base64">Base64</option>
+                    <option value="caesar">César</option>
+                    <option value="reverse">Invertido</option>
+                    <option value="binary">Binario</option>
+                </select>
+                
+                <div class="method-info">
+                    <p>Base64: Convierte texto en código alfanumérico.</p>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3><i class="fas fa-eye"></i> Modo</h3>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                    <label class="switch">
+                        <input type="checkbox" id="secretMode">
+                        <span class="slider"></span>
+                    </label>
+                    <span>Modo secreto</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-light);">
+                    Los mensajes se muestran codificados hasta que los toques.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <div class="contact-info">
+                    <h2>Esposa 💖</h2>
+                    <p>Usando: <span id="currentMethod">Base64</span></p>
+                </div>
+                <button id="clearChat" class="btn-small">
+                    <i class="fas fa-trash"></i> Limpiar
+                </button>
+            </div>
+            
+            <div class="messages-container" id="messagesContainer">
+                <!-- Mensajes aparecerán aquí -->
+                <div class="message received">
+                    <div class="message-content">
+                        <div class="encoded-text">SG9sYSwgY29tbyBlc3Rhcz8gRW52aWEgbWUgdW4gbWVuc2FqZSBzZWNyZXRvLg==</div>
+                        <div class="decoded-text">Hola, ¿cómo estás? Envíame un mensaje secreto.</div>
+                    </div>
+                    <div class="message-time">Hoy 10:30</div>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <div class="input-actions">
+                    <button id="encodeBtn" class="icon-btn">
+                        <i class="fas fa-lock"></i>
+                    </button>
+                    <button id="decodeBtn" class="icon-btn">
+                        <i class="fas fa-unlock"></i>
+                    </button>
+                    <button id="toggleView" class="icon-btn">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                
+                <textarea 
+                    id="messageInput" 
+                    placeholder="Escribe tu mensaje secreto... (Usa Ctrl+Enter para enviar)"
+                    rows="2"></textarea>
+                
+                <div class="send-row">
+                    <div class="char-count">
+                        <span id="charCount">0</span> chars
+                    </div>
+                    <button id="sendBtn" class="send-btn">
+                        <i class="fas fa-paper-plane"></i> Enviar Codificado
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botón flotante para vista previa -->
+        <button class="float-btn" id="previewToggle" title="Vista previa">
+            <i class="fas fa-eye"></i>
+        </button>
+    </div>
+
+    <!-- JavaScript incluido -->
+    <script>
+        // ========== VARIABLES GLOBALES ==========
+        let currentEncoding = 'base64';
+        let messages = [];
+        let isDarkMode = false;
+        
+        // ========== FUNCIONES DE CODIFICACIÓN ==========
+        function encodeBase64(text) {
+            try {
+                return btoa(unescape(encodeURIComponent(text)));
+            } catch {
+                return text;
+            }
+        }
+        
+        function decodeBase64(text) {
+            try {
+                return decodeURIComponent(escape(atob(text)));
+            } catch {
+                return text;
+            }
+        }
+        
+        function encodeCaesar(text, shift = 3) {
+            return text.split('').map(char => {
+                const code = char.charCodeAt(0);
+                if (code >= 65 && code <= 90) {
+                    return String.fromCharCode(((code - 65 + shift) % 26) + 65);
+                }
+                if (code >= 97 && code <= 122) {
+                    return String.fromCharCode(((code - 97 + shift) % 26) + 97);
+                }
+                return char;
+            }).join('');
+        }
+        
+        function decodeCaesar(text, shift = 3) {
+            return encodeCaesar(text, 26 - shift);
+        }
+        
+        function encodeReverse(text) {
+            return text.split('').reverse().join('');
+        }
+        
+        // ========== FUNCIONES PRINCIPALES ==========
+        function encodeText(text) {
+            switch(currentEncoding) {
+                case 'base64': return encodeBase64(text);
+                case 'caesar': return encodeCaesar(text, 3);
+                case 'reverse': return encodeReverse(text);
+                case 'binary': 
+                    return text.split('').map(c => 
+                        c.charCodeAt(0).toString(2).padStart(8, '0')
+                    ).join(' ');
+                default: return text;
+            }
+        }
+        
+        function decodeText(text) {
+            switch(currentEncoding) {
+                case 'base64': return decodeBase64(text);
+                case 'caesar': return decodeCaesar(text, 3);
+                case 'reverse': return encodeReverse(text);
+                case 'binary':
+                    return text.split(' ').map(bin => 
+                        String.fromCharCode(parseInt(bin, 2))
+                    ).join('');
+                default: return text;
+            }
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (!text) {
+                alert('Escribe un mensaje primero');
+                return;
+            }
+            
+            const message = {
+                id: Date.now(),
+                text: text,
+                encoded: encodeText(text),
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                sender: 'user'
+            };
+            
+            messages.push(message);
+            addMessageToDOM(message);
+            input.value = '';
+            updateCharCount();
+            
+            // Cerrar sidebar en móvil
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
+            
+            // Enfocar input
+            input.focus();
+        }
+        
+        function addMessageToDOM(message) {
+            const container = document.getElementById('messagesContainer');
+            const isSent = message.sender === 'user';
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+            
+            msgDiv.innerHTML = `
+                <div class="message-content">
+                    <div class="encoded-text">${message.encoded}</div>
+                    <div class="decoded-text">${message.text}</div>
+                </div>
+                <div class="message-time">${message.time}</div>
+            `;
+            
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+            
+            // Click para revelar
+            msgDiv.addEventListener('click', function() {
+                this.classList.toggle('show-decoded');
+            });
+        }
+        
+        function updateCharCount() {
+            const text = document.getElementById('messageInput').value;
+            document.getElementById('charCount').textContent = text.length;
+        }
+        
+        // ========== EVENT LISTENERS ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Menu toggle
+            document.getElementById('menuToggle').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+            
+            // Preview toggle
+            document.getElementById('previewToggle').addEventListener('click', function() {
+                alert('Vista previa - Próxima función');
+            });
+            
+            // Theme toggle
+            document.getElementById('themeToggle').addEventListener('click', function() {
+                isDarkMode = !isDarkMode;
+                document.body.classList.toggle('dark-mode', isDarkMode);
+                const icon = this.querySelector('i');
+                icon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+            });
+            
+            // Encoding method
+            document.getElementById('encodingMethod').addEventListener('change', function() {
+                currentEncoding = this.value;
+                document.getElementById('currentMethod').textContent = 
+                    this.options[this.selectedIndex].text;
+            });
+            
+            // Input events
+            const messageInput = document.getElementById('messageInput');
+            messageInput.addEventListener('input', updateCharCount);
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // Send button
+            document.getElementById('sendBtn').addEventListener('click', sendMessage);
+            
+            // Encode/decode buttons
+            document.getElementById('encodeBtn').addEventListener('click', function() {
+                const input = document.getElementById('messageInput');
+                input.value = encodeText(input.value);
+                updateCharCount();
+            });
+            
+            document.getElementById('decodeBtn').addEventListener('click', function() {
+                const input = document.getElementById('messageInput');
+                input.value = decodeText(input.value);
+                updateCharCount();
+            });
+            
+            // Toggle view
+            document.getElementById('toggleView').addEventListener('click', function() {
+                document.querySelectorAll('.message').forEach(msg => {
+                    msg.classList.toggle('show-decoded');
+                });
+            });
+            
+            // Clear chat
+            document.getElementById('clearChat').addEventListener('click', function() {
+                if (confirm('¿Borrar todo el chat?')) {
+                    document.getElementById('messagesContainer').innerHTML = '';
+                    messages = [];
+                }
+            });
+            
+            // Cerrar sidebar al tocar fuera (solo móvil)
+            document.addEventListener('click', function(event) {
+                const sidebar = document.getElementById('sidebar');
+                const menuToggle = document.getElementById('menuToggle');
+                
+                if (window.innerWidth < 768 && 
+                    sidebar.classList.contains('active') &&
+                    !sidebar.contains(event.target) &&
+                    !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+            
+            // Inicializar
+            updateCharCount();
+        });
+    </script>
+</body>
+</html>
