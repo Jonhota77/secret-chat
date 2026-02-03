@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecretChat - Mensajes Codificados</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Source+Code+Pro&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Encabezado -->
+        <header class="app-header">
+            <div class="header-left">
+                <i class="fas fa-user-secret logo-icon"></i>
+                <h1>SecretChat</h1>
+            </div>
+            <div class="header-right">
+                <button id="themeToggle" class="icon-btn" title="Cambiar tema">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="helpBtn" class="icon-btn" title="Ayuda">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Panel izquierdo: Contactos/Métodos -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-users"></i> Contactos</h3>
+                    <div class="contacts-list">
+                        <div class="contact active" data-contact="amigo1">
+                            <div class="contact-avatar">A1</div>
+                            <div class="contact-info">
+                                <span class="contact-name">Amigo Secreto</span>
+                                <span class="contact-status">En línea</span>
+                            </div>
+                        </div>
+                        <div class="contact" data-contact="amigo2">
+                            <div class="contact-avatar">A2</div>
+                            <div class="contact-info">
+                                <span class="contact-name">Compañero Misterio</span>
+                                <span class="contact-status">Codificando...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-lock"></i> Método de Codificación</h3>
+                    <div class="encoding-methods">
+                        <select id="encodingMethod" class="method-select">
+                            <option value="base64">Base64 (Recomendado)</option>
+                            <option value="caesar">Cifrado César</option>
+                            <option value="reverse">Texto Invertido</option>
+                            <option value="binary">Código Binario</option>
+                            <option value="hex">Hexadecimal</option>
+                            <option value="morse">Código Morse</option>
+                        </select>
+                        
+                        <!-- Configuración extra para César -->
+                        <div id="caesarConfig" class="method-config" style="display: none;">
+                            <label>Desplazamiento:</label>
+                            <input type="range" id="caesarShift" min="1" max="25" value="3">
+                            <span id="shiftValue">3</span>
+                        </div>
+
+                        <div class="method-info">
+                            <p id="methodDescription">
+                                Base64 convierte texto en código alfanumérico. Seguro para miradas rápidas.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-eye"></i> Modo Visual</h3>
+                    <div class="visual-mode">
+                        <label class="switch">
+                            <input type="checkbox" id="secretModeToggle">
+                            <span class="slider"></span>
+                        </label>
+                        <span>Modo Secreto (solo ver código)</span>
+                    </div>
+                    <p class="mode-help">
+                        En modo secreto, los mensajes se muestran codificados hasta que los toques.
+                    </p>
+                </div>
+            </aside>
+
+            <!-- Panel central: Chat -->
+            <main class="chat-container">
+                <!-- Encabezado del chat -->
+                <div class="chat-header">
+                    <div class="current-contact">
+                        <div class="contact-avatar">A1</div>
+                        <div>
+                            <h2>Amigo Secreto</h2>
+                            <p>Usando: <span id="currentMethod">Base64</span></p>
+                        </div>
+                    </div>
+                    <button id="clearChat" class="btn-small">
+                        <i class="fas fa-trash"></i> Limpiar chat
+                    </button>
+                </div>
+
+                <!-- Área de mensajes -->
+                <div class="messages-container" id="messagesContainer">
+                    <!-- Los mensajes aparecerán aquí dinámicamente -->
+                    <div class="message received">
+                        <div class="message-content">
+                            <div class="encoded-text">SG9sYSwgY29tbyBlc3Rhcz8gRW52aWEgbWUgYWxndW4gbWVuc2FqZSBzZWNyZXRvLg==</div>
+                            <div class="decoded-text">Hola, como estas? Enviame algun mensaje secreto.</div>
+                        </div>
+                        <div class="message-time">10:30 AM</div>
+                    </div>
+                </div>
+
+                <!-- Panel de entrada -->
+                <div class="input-container">
+                    <div class="input-actions">
+                        <button id="toggleView" class="icon-btn" title="Ver codificado/decodificado">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button id="encodeBtn" class="icon-btn" title="Codificar texto">
+                            <i class="fas fa-lock"></i>
+                        </button>
+                        <button id="decodeBtn" class="icon-btn" title="Decodificar texto">
+                            <i class="fas fa-unlock"></i>
+                        </button>
+                    </div>
+                    
+                    <textarea 
+                        id="messageInput" 
+                        placeholder="Escribe tu mensaje secreto aquí... (Presiona Ctrl+Enter para enviar)"
+                        rows="3"></textarea>
+                    
+                    <div class="send-container">
+                        <div class="char-count">
+                            <span id="charCount">0</span> caracteres
+                        </div>
+                        <button id="sendBtn" class="send-btn">
+                            <i class="fas fa-paper-plane"></i> Enviar Codificado
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel de vista previa -->
+                <div class="preview-container">
+                    <div class="preview-header">
+                        <h4><i class="fas fa-search"></i> Vista Previa</h4>
+                        <small>Así se verá tu mensaje</small>
+                    </div>
+                    <div class="preview-box">
+                        <div class="preview-encoded" id="previewEncoded">
+                            Tu mensaje codificado aparecerá aquí...
+                        </div>
+                        <div class="preview-decoded" id="previewDecoded">
+                            Tu mensaje original aparecerá aquí...
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Pie de página -->
+        <footer class="app-footer">
+            <p>
+                <i class="fas fa-info-circle"></i> 
+                Esta aplicación es creada por<strong>Jonh Jota Soluciones</strong>. 
+                Te damos Confianza.
+            </p>
+        </footer>
+    </div>
+
+    <!-- Modal de ayuda -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2><i class="fas fa-question-circle"></i> Cómo usar SecretChat</h2>
+            <div class="help-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Selecciona un método</h3>
+                    <p>Elige cómo quieres codificar tus mensajes en el panel izquierdo.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Escribe tu mensaje</h3>
+                    <p>Escribe en el área de texto. Verás una vista previa automática.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Envía y revela</h3>
+                    <p>Envía tu mensaje codificado. Toca los mensajes para revelarlos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
